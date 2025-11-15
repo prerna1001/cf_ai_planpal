@@ -1,3 +1,65 @@
+/* PlanPal Markdown Styling */
+.planpal-paragraph {
+  margin: 0.7em 0;
+  font-size: 1.08em;
+  line-height: 1.7;
+}
+.planpal-heading {
+  margin: 1.2em 0 0.7em 0;
+  font-weight: 700;
+  color: #2a3a4d;
+}
+.planpal-h1 {
+  font-size: 1.7em;
+  border-bottom: 2px solid #e0e7ef;
+  padding-bottom: 0.2em;
+}
+.planpal-h2 {
+  font-size: 1.3em;
+  border-bottom: 1px solid #e0e7ef;
+  padding-bottom: 0.1em;
+}
+.planpal-h3 {
+  font-size: 1.1em;
+}
+.planpal-list {
+  margin: 0.7em 0 0.7em 1.2em;
+  padding-left: 1.2em;
+}
+.planpal-list-ol {
+  list-style-type: decimal;
+}
+.planpal-list-item {
+  margin: 0.3em 0;
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+.planpal-blockquote {
+  margin: 1em 0;
+  padding: 0.7em 1em;
+  background: #f6f8fa;
+  border-left: 4px solid #b3c2d2;
+  font-style: italic;
+  color: #3a4a5d;
+}
+.planpal-bold {
+  font-weight: bold;
+  color: #1a2a3d;
+}
+.planpal-italic {
+  font-style: italic;
+}
+.planpal-code {
+  background: #f3f3f3;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'Fira Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 0.98em;
+}
+.planpal-link {
+  color: #2a7ae2;
+  text-decoration: underline;
+}
 .App {
   display: flex;
   height: 100vh;

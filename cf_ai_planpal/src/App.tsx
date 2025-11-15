@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { FaBars, FaBell, FaTimes, FaMicrophone, FaStop, FaPaperPlane, FaTrash } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+import { ReactElement } from 'react';
 import { IoMdCheckmark } from 'react-icons/io';
 import { MdWavingHand } from 'react-icons/md';
 
@@ -384,102 +386,7 @@ function App() {
   };
 
   // Format message content to preserve newlines and structure
-  const formatMessage = (content: string) => {
-    // Helper function to parse bold markdown (**text**)
-    const parseBold = (text: string) => {
-      const parts: (string | React.ReactElement)[] = [];
-      const boldRegex = /\*\*(.+?)\*\*/g;
-      let lastIndex = 0;
-      let match;
-
-      while ((match = boldRegex.exec(text)) !== null) {
-        // Add text before the bold part
-        if (match.index > lastIndex) {
-          parts.push(text.substring(lastIndex, match.index));
-        }
-        // Add bold text
-        parts.push(<strong key={match.index}>{match[1]}</strong>);
-        lastIndex = match.index + match[0].length;
-      }
-      
-      // Add remaining text
-      if (lastIndex < text.length) {
-        parts.push(text.substring(lastIndex));
-      }
-      
-      return parts.length > 0 ? parts : text;
-    };
-
-    const lines = content.split('\n');
-    const result: React.ReactElement[] = [];
-    let currentParagraph: string[] = [];
-    
-    const flushParagraph = (key: number) => {
-      if (currentParagraph.length > 0) {
-        const text = currentParagraph.join(' ').trim();
-        if (text) {
-          result.push(
-            <div key={key} className="message-line">
-              {parseBold(text)}
-            </div>
-          );
-        }
-        currentParagraph = [];
-      }
-    };
-
-    lines.forEach((line, idx) => {
-      const trimmed = line.trim();
-      
-      // Empty line - flush current paragraph and add break
-      if (!trimmed) {
-        flushParagraph(idx);
-        result.push(<br key={`br-${idx}`} />);
-        return;
-      }
-      
-      // Day header
-      if (trimmed.match(/^Day \d+:/)) {
-        flushParagraph(idx);
-        result.push(
-          <div key={idx} className="day-header">
-            {parseBold(trimmed)}
-          </div>
-        );
-        return;
-      }
-      
-      // Bullet point
-      if (trimmed.startsWith('*')) {
-        flushParagraph(idx);
-        result.push(
-          <div key={idx} className="bullet-point">
-            {parseBold(trimmed.substring(1).trim())}
-          </div>
-        );
-        return;
-      }
-      
-      // Numbered list item (e.g., "1. ", "2. ", "3. ")
-      if (trimmed.match(/^\d+\.\s/)) {
-        flushParagraph(idx);
-        result.push(
-          <div key={idx} className="message-line">
-            {parseBold(trimmed)}
-          </div>
-        );
-        return;
-      }
-      
-      // Regular line - add to current paragraph
-      currentParagraph.push(trimmed);
-    });
-    
-    // Flush any remaining paragraph
-    flushParagraph(lines.length);
-    
-    return result;
-  };
+  // Removed formatMessage; now using react-markdown for robust output
 
   const handleClearChat = () => {
     if (window.confirm('Are you sure you want to start a new chat? This will clear the current conversation.')) {
@@ -755,7 +662,24 @@ function App() {
                     <span className="thinking-text">Thinking...</span>
                   </div>
                 ) : (
-                  formatMessage(msg.content)
+                  <ReactMarkdown
+                    components={{
+                      p: ({node, ...props}) => <p className="planpal-paragraph" {...props} />,
+                      h1: ({node, ...props}) => <h1 className="planpal-heading planpal-h1" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="planpal-heading planpal-h2" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="planpal-heading planpal-h3" {...props} />,
+                      ul: ({node, ...props}) => <ul className="planpal-list" {...props} />,
+                      ol: ({node, ...props}) => <ol className="planpal-list planpal-list-ol" {...props} />,
+                      li: ({node, ...props}) => <li className="planpal-list-item" {...props} />,
+                      blockquote: ({node, ...props}) => <blockquote className="planpal-blockquote" {...props} />,
+                      strong: ({node, ...props}) => <strong className="planpal-bold" {...props} />,
+                      em: ({node, ...props}) => <em className="planpal-italic" {...props} />,
+                      code: ({node, ...props}) => <code className="planpal-code" {...props} />,
+                      a: ({node, ...props}) => <a className="planpal-link" {...props} />,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 )}
               </div>
             </div>
