@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { FaBars, FaBell, FaTimes, FaMicrophone, FaStop, FaPaperPlane, FaTrash } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
-import { ReactElement } from 'react';
 import { IoMdCheckmark } from 'react-icons/io';
 import { MdWavingHand } from 'react-icons/md';
 
