@@ -53,6 +53,8 @@ const getSessions = (): ChatSession[] => {
 };
 
 function App() {
+  // API base: configurable via Vite env for production, falls back to local dev
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8787';
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -152,7 +154,7 @@ function App() {
   useEffect(() => {
     const loadReminders = async () => {
       try {
-        const res = await fetch(`http://localhost:8787/reminders?user=${encodeURIComponent(clientId)}`);
+        const res = await fetch(`${API_BASE}/reminders?user=${encodeURIComponent(clientId)}`);
         const data = await res.json();
         if (Array.isArray(data.reminders)) setUpcomingReminders(data.reminders);
       } catch (e) {
@@ -166,7 +168,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:8787/reminders/due?user=${encodeURIComponent(clientId)}&ack=true`);
+        const res = await fetch(`${API_BASE}/reminders/due?user=${encodeURIComponent(clientId)}&ack=true`);
         const data = await res.json();
         if (Array.isArray(data.due) && data.due.length > 0) {
           setDueNotifs(prev => [...prev, ...data.due]);
@@ -201,7 +203,7 @@ function App() {
           });
           
           // Refresh upcoming list after due items are removed
-          const res2 = await fetch(`http://localhost:8787/reminders?user=${encodeURIComponent(clientId)}`);
+          const res2 = await fetch(`${API_BASE}/reminders?user=${encodeURIComponent(clientId)}`);
           const data2 = await res2.json();
           if (Array.isArray(data2.reminders)) setUpcomingReminders(data2.reminders);
         }
@@ -277,7 +279,7 @@ function App() {
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      const response = await fetch('http://localhost:8787/chat', {
+      const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -319,7 +321,7 @@ function App() {
     try {
       // Convert datetime-local to ISO string or timestamp
       const whenMs = new Date(reminderAt).getTime();
-      const res = await fetch('http://localhost:8787/reminders', {
+      const res = await fetch(`${API_BASE}/reminders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: clientId, text: reminderText.trim(), at: whenMs }),
@@ -364,7 +366,7 @@ function App() {
     if (!editingId) return;
     try {
       const whenMs = new Date(editAt).getTime();
-      const res = await fetch(`http://localhost:8787/reminders/${encodeURIComponent(editingId)}?user=${encodeURIComponent(clientId)}`, {
+      const res = await fetch(`${API_BASE}/reminders/${encodeURIComponent(editingId)}?user=${encodeURIComponent(clientId)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: editText, at: whenMs }),
@@ -388,7 +390,7 @@ function App() {
   const deleteReminder = async (id: string) => {
     if (!window.confirm('Delete this reminder?')) return;
     try {
-      const res = await fetch(`http://localhost:8787/reminders/${encodeURIComponent(id)}?user=${encodeURIComponent(clientId)}`, {
+      const res = await fetch(`${API_BASE}/reminders/${encodeURIComponent(id)}?user=${encodeURIComponent(clientId)}`, {
         method: 'DELETE',
       });
       const data = await res.json();
@@ -512,7 +514,7 @@ function App() {
   const loadSession = async (session: ChatSession) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8787/memory/${session.id}`);
+  const response = await fetch(`${API_BASE}/memory/${session.id}`);
       const data = await response.json();
       
       if (data.memory && Array.isArray(data.memory)) {
