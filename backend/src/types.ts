@@ -1,3 +1,4 @@
+// Environment bindings injected by Cloudflare (wrangler.toml)
 export interface Env {
   AI: any;
   Chat: DurableObjectNamespace;
@@ -7,6 +8,7 @@ export interface Env {
   MODEL_FALLBACKS?: string; // comma-separated list of fallbacks
 }
 
+// Minimal chat message shape shared between DO and frontend
 export interface Message{
   role: "user" | "assistant" | "system";
   content: string;

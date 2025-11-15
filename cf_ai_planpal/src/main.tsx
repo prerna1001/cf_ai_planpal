@@ -1,3 +1,4 @@
+// Frontend entry: mounts the React app under #root
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

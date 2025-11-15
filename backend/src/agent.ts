@@ -1,3 +1,5 @@
+// Optional/experimental Agent-based chat example.
+// Not required for core PlanPal flow (Worker + DO), but kept as a reference.
 import { Agent } from "agents";
 import { Env } from "./types";
 

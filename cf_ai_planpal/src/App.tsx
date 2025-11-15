@@ -1,3 +1,16 @@
+/**
+ * App.tsx — PlanPal UI
+ *
+ * Layout overview
+ * - Sidebar: lightweight chat history stored in localStorage
+ * - Main area: chat messages (user, thinking, assistant)
+ * - Reminders drawer: add/edit upcoming reminders and view recent notifications
+ *
+ * Key behaviors
+ * - Voice input via Web Speech API (Chrome/Edge)
+ * - Markdown rendering of assistant/user messages with react-markdown
+ * - Graceful loading/thinking indicator while the backend works
+ */
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { FaBars, FaBell, FaTimes, FaMicrophone, FaStop, FaPaperPlane, FaTrash } from 'react-icons/fa';

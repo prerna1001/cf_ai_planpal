@@ -1,5 +1,21 @@
 import type { Message, Env, DurableObjectState } from "./types";
 
+/**
+ * PlanPalDO — Durable Object
+ *
+ * Owns user-specific state:
+ * - Chat memory (the rolling conversation sent to the LLM)
+ * - Reminders list and due-notification queue
+ *
+ * Exposes a tiny JSON API consumed by the Worker:
+ *   GET  /memory               → debug: view stored conversation
+ *   GET  /reminders            → list upcoming reminders
+ *   GET  /reminders/due        → read (and optionally ack) due notifications
+ *   POST /reminders            → create reminder
+ *   PATCH/DELETE /reminders/:id→ update/delete reminder
+ *   POST /chat                 → append user msg, call AI, persist assistant reply
+ */
+
 
 export class PlanPalDO {
 state: DurableObjectState;
@@ -144,14 +160,14 @@ async fetch(request: Request): Promise<Response> {
 
     const { input } = await request.json();
 
-    //Load memory from storage
+    // Load chat memory and append the new user message
     const stored = await this.state.storage.get<unknown>("memory");
     this.memory = Array.isArray(stored) ? stored : [];
 
     //Add new user input
     this.memory.push({ role: "user", content: input });
 
-    //build system prompt + conversation
+    // Build the system prompt + conversation for the LLM
     const messages: Message[] = [
       {
         role: "system",
@@ -190,7 +206,8 @@ Keep responses focused and well-structured. Use bullet points, numbered lists, t
       ...this.memory,
     ];
 
-        // Choose model with fallbacks
+    // Choose model with fallbacks
+    // If MODEL env is not set or a model is unavailable, try sensible defaults
         const configured = (this.env.MODEL || "").trim();
         const fallbacksFromEnv = (this.env.MODEL_FALLBACKS || "").split(",").map(s => s.trim()).filter(Boolean);
         const candidateModels = [
@@ -213,7 +230,7 @@ Keep responses focused and well-structured. Use bullet points, numbered lists, t
                 break;
             } catch (err: any) {
                 const msg = String(err?.message || err);
-                // If it's a missing model error, try next; otherwise rethrow
+                // Prefer graceful fallback on known "missing model" errors; otherwise surface the error
                 if (msg.includes("No such model") || msg.includes("5007")) {
                     lastError = err;
                     continue;
@@ -228,7 +245,7 @@ Keep responses focused and well-structured. Use bullet points, numbered lists, t
 
     const reply = response.response;
 
-    // Add AI reply to memory
+    // Persist assistant reply and updated memory
     this.memory.push({ role: "assistant", content: reply });
 
     // Save memory
@@ -266,7 +283,7 @@ Keep responses focused and well-structured. Use bullet points, numbered lists, t
         await this.scheduleNextAlarm(future);
     }
 
-    // Helper to set next alarm to the soonest reminder, if any
+    // Helper: set the next alarm to the soonest reminder, if any
     private async scheduleNextAlarm(reminders?: Array<{ id: string; at: number; text: string }>): Promise<void> {
         const stored = reminders ?? (await this.state.storage.get<unknown>("reminders"));
         const list = (Array.isArray(stored) ? stored : []) as Array<{ id: string; at: number; text: string }>;

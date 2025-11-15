@@ -1,9 +1,18 @@
+/**
+ * Cloudflare Worker entrypoint for PlanPal
+ * - Provides a small HTTP router for chat and reminders
+ * - Adds friendly CORS so Cloudflare Pages/localhost can call the API
+ * - Proxies requests to the Durable Object (PlanPalDO) using absolute URLs
+ *
+ * If you’re debugging a route, search for its section below (e.g. /chat, /reminders).
+ */
 import { PlanPalDO } from "./PlanPalDO";
 export { PlanPalDO };
 import type { Env, ExecutionContext } from "./types";
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Shared CORS headers: keep Pages and local dev unblocked
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, DELETE",
@@ -18,7 +27,7 @@ export default {
     }
 
     try {
-      // Route: GET /ai/check?model=...  -- quick availability check for Workers AI models
+  // Health probe: GET /ai/check?model=...  — tiny call to verify a Workers AI model is usable
       if (request.method === "GET" && url.pathname === "/ai/check") {
         const model = url.searchParams.get("model") || "@cf/meta/llama-3.3-8b-instruct";
         try {
@@ -38,7 +47,7 @@ export default {
           );
         }
       }
-      // Route: GET /memory/:user - Debug endpoint to view stored memory
+  // Debug: GET /memory/:user — fetch chat memory stored by the DO for that user
       if (request.method === "GET" && url.pathname.startsWith("/memory/")) {
         const user = url.pathname.split("/memory/")[1];
         if (!user) {
@@ -56,7 +65,7 @@ export default {
         });
       }
 
-      // Route: GET /reminders?user=... - list upcoming reminders for a user
+  // Reminders: list upcoming for a user
       if (request.method === "GET" && url.pathname === "/reminders") {
         const user = url.searchParams.get("user");
         if (!user) {
@@ -72,7 +81,7 @@ export default {
         return new Response(body, { status: doRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // Route: GET /reminders/due?user=...&ack=true - poll due notifications
+  // Reminders: poll due notifications; add ack=true to clear after reading
       if (request.method === "GET" && url.pathname === "/reminders/due") {
         const user = url.searchParams.get("user");
         const ack = url.searchParams.get("ack");
@@ -90,7 +99,7 @@ export default {
         return new Response(body, { status: doRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // Route: POST /reminders - create a reminder for a user
+  // Reminders: create
       if (url.pathname === "/reminders" && request.method === "POST") {
         const { user, text, at } = await request.json();
         if (!user || !text || !at) {
@@ -110,7 +119,7 @@ export default {
         return new Response(body, { status: doRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // Route: POST /chat
+  // Chat: proxy to PlanPalDO — keeps the Worker thin and stateless
       if (url.pathname === "/chat" && request.method === "POST") {
         // Parse request
         const { user, input } = await request.json();
