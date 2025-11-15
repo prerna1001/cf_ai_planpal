@@ -328,6 +328,41 @@
   margin-top: 4px;
 }
 
+.due-reminders {
+  margin-top: 16px;
+}
+
+.due-reminders ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.due-reminders li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px dashed #eee;
+}
+
+.due-reminders li:first-child {
+  border-top: none;
+}
+
+.due-reminders .reminder-time {
+  color: #1976d2;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.due-reminders .reminder-text-item {
+  color: #333;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
 button.small {
   min-width: auto;
   padding: 6px 10px;
@@ -340,8 +375,20 @@ button.small.danger {
 
 .reminder-edit-form {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   width: 100%;
+}
+
+.reminder-edit-form input[type="datetime-local"],
+.reminder-edit-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reminder-edit-form button {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {
