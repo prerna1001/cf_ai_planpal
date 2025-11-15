@@ -18,8 +18,10 @@ class_name = "PlanPalDO"
 tag = "v1"
 new_classes = ["PlanPalDO"]
 
-[[migrations]]
-tag = "v2"
-renamed_classes = [
-	{ from = "Chat", to = "PlanPalDO" }
-]
+# Migration v2 only for production (rename Chat->PlanPalDO)
+# Commented out for local dev to avoid migration errors
+# [[migrations]]
+# tag = "v2"
+# renamed_classes = [
+# 	{ from = "Chat", to = "PlanPalDO" }
+# ]

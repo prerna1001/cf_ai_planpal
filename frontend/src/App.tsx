@@ -55,6 +55,7 @@ const getSessions = (): ChatSession[] => {
 function App() {
   // API base: configurable via Vite env for production, falls back to local dev
   const API_BASE = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8787';
+  const DRAWER_WIDTH = 360; // fixed drawer width; resizer removed
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -81,13 +82,7 @@ function App() {
   const [showReminders, setShowReminders] = useState(false);
   const [dueNotifs, setDueNotifs] = useState<Array<{id: string; at: number; text: string}>>([]);
   const [popupReminder, setPopupReminder] = useState<{id: string; at: number; text: string} | null>(null);
-  // Drawer sizing
-  const [drawerWidth, setDrawerWidth] = useState<number>(() => {
-    const stored = localStorage.getItem('remindersDrawerWidth');
-    const val = stored ? parseInt(stored, 10) : 360;
-    return isNaN(val) ? 360 : Math.min(Math.max(val, 300), 640);
-  });
-  const [isResizing, setIsResizing] = useState(false);
+  // Drawer sizing (fixed; resizer removed)
   const [viewportWidth, setViewportWidth] = useState<number>(() =>
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
@@ -214,25 +209,7 @@ function App() {
     return () => clearInterval(interval);
   }, [clientId]);
 
-  // Resizer: handle drag to adjust width
-  useEffect(() => {
-    if (!isResizing) return;
-    const onMove = (e: MouseEvent) => {
-      // Drawer is anchored to the right; width = window.innerWidth - cursorX
-      const next = Math.min(Math.max(window.innerWidth - e.clientX, 300), 640);
-      setDrawerWidth(next);
-    };
-    const onUp = () => {
-      setIsResizing(false);
-      localStorage.setItem('remindersDrawerWidth', String(drawerWidth));
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [isResizing, drawerWidth]);
+  // Resizer removed; drawer has fixed width via CSS/DRAWER_WIDTH
 
   // Track viewport width for responsive behavior
   useEffect(() => {
@@ -635,26 +612,24 @@ function App() {
       )}
 
       {/* Reminders Drawer */}
-      <div className={`reminders-drawer ${showReminders ? 'open' : ''}`} style={{ width: drawerWidth }}>
-        <div
-          className="reminders-resizer"
-          onMouseDown={() => setIsResizing(true)}
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize reminders panel"
-        />
+      <div className={`reminders-drawer ${showReminders ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h3>Reminders</h3>
           <button onClick={() => setShowReminders(false)} className="close-sidebar"><FaTimes /></button>
         </div>
         <div className="reminders-content">
           <form className="reminder-form" onSubmit={handleAddReminder}>
-            <input
-              type="text"
+            <textarea
               className="reminder-text"
               placeholder="Reminder text (e.g., Check flights)"
               value={reminderText}
               onChange={(e) => setReminderText(e.target.value)}
+              onInput={(e) => {
+                const t = e.currentTarget;
+                t.style.height = 'auto';
+                t.style.height = `${t.scrollHeight}px`;
+              }}
+              rows={2}
               disabled={reminderSubmitting}
             />
             <input
@@ -684,11 +659,16 @@ function App() {
                           onChange={(e) => setEditAt(e.target.value)}
                           required
                         />
-                        <input
-                          type="text"
+                        <textarea
                           className="reminder-text"
                           value={editText}
                           onChange={(e) => setEditText(e.target.value)}
+                          onInput={(e) => {
+                            const t = e.currentTarget;
+                            t.style.height = 'auto';
+                            t.style.height = `${t.scrollHeight}px`;
+                          }}
+                          rows={2}
                           required
                         />
                         <button type="submit">Save</button>
@@ -740,7 +720,7 @@ function App() {
       <div 
         className="main-content"
         style={{ 
-          marginRight: showReminders && !isMobile ? `calc(${drawerWidth}px + (100vw - 100%) / 2)` : 'auto',
+          marginRight: showReminders && !isMobile ? `calc(${DRAWER_WIDTH}px + (100vw - 100%) / 2)` : 'auto',
           marginLeft: showReminders && !isMobile ? 'auto' : 'auto'
         }}
       >
