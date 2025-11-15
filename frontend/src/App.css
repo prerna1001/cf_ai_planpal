@@ -299,11 +299,10 @@
 
 .upcoming-reminders li {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 6px 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
   border-top: 1px dashed #eee;
-  align-items: flex-start;
 }
 
 .upcoming-reminders li:first-child {
@@ -313,23 +312,20 @@
 .upcoming-reminders .reminder-time {
   color: #1976d2;
   font-weight: 600;
-  min-width: 180px;
-  flex-shrink: 0;
+  font-size: 13px;
 }
 
 .upcoming-reminders .reminder-text-item {
   color: #333;
-  flex: 1;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  min-width: 0;
+  line-height: 1.5;
 }
 
 .upcoming-reminders .reminder-actions {
-  margin-left: auto;
   display: flex;
   gap: 6px;
-  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 button.small {
