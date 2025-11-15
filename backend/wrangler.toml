@@ -1,17 +1,19 @@
 name = "cf-ai-planpal"
-main = "src/agent.ts"
+main = "src/worker.ts"
 compatibility_date = "2025-11-14"
 compatibility_flags = ["nodejs_compat"]
+
+[env.development]
+vars = { ENVIRONMENT = "development", MODEL = "@cf/meta/llama-3.1-8b-instruct" }
 
 [ai]
 binding = "AI"
 remote = true
 
-[durable_objects]
-bindings = [
-  { name = "Chat", class_name = "Chat" }
-]
+[[durable_objects.bindings]]
+name = "PLANPAL_DO"
+class_name = "PlanPalDO"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["Chat"]
+new_classes = ["PlanPalDO"]
