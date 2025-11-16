@@ -173,15 +173,32 @@ function App() {
     loadReminders();
   }, [clientId]);
 
-  // Poll due reminders periodically and keep a local notifications list
-  // Only poll if there are upcoming reminders to avoid unnecessary requests
+  // Smart reminder checking: only check when a reminder is actually due
+  // Instead of polling every 10s, we schedule a check for the next reminder time
   useEffect(() => {
-    // Skip polling if no upcoming reminders
     if (upcomingReminders.length === 0) {
       return;
     }
 
-    const interval = setInterval(async () => {
+    // Find the next reminder that will be due
+    const now = Date.now();
+    const nextReminder = upcomingReminders
+      .filter(r => r.at > now)
+      .sort((a, b) => a.at - b.at)[0];
+
+    if (!nextReminder) {
+      return;
+    }
+
+    // Calculate how long until the next reminder
+    const msUntilDue = nextReminder.at - now;
+    
+    // Add a small buffer (5 seconds) to ensure we don't miss it
+    const checkDelay = Math.max(0, msUntilDue - 5000);
+
+    console.log(`Next reminder in ${Math.round(msUntilDue / 1000)}s, checking in ${Math.round(checkDelay / 1000)}s`);
+
+    const timeoutId = setTimeout(async () => {
       try {
         const res = await fetch(`${API_BASE}/reminders/due?user=${encodeURIComponent(clientId)}&ack=true`);
         const data = await res.json();
@@ -225,9 +242,10 @@ function App() {
       } catch (e) {
         // silent
       }
-    }, 10000); // every 10s
-    return () => clearInterval(interval);
-  }, [clientId, upcomingReminders.length]); // Re-run when reminders change
+    }, checkDelay);
+
+    return () => clearTimeout(timeoutId);
+  }, [clientId, upcomingReminders]); // Re-run when reminders change
 
   // Resizer removed; drawer has fixed width via CSS/DRAWER_WIDTH
 
