@@ -60,22 +60,19 @@ export default {
           );
         }
       }
-  // Debug: GET /memory/:user — fetch chat memory stored by the DO for that user
+  // Debug: GET /memory/:sessionId — fetch chat memory from the Chat Agent for that session
       if (request.method === "GET" && url.pathname.startsWith("/memory/")) {
-        const user = url.pathname.split("/memory/")[1];
-        if (!user) {
-          return new Response(JSON.stringify({ error: "Missing user parameter" }), {
+        const sessionId = url.pathname.split("/memory/")[1];
+        if (!sessionId) {
+          return new Response(JSON.stringify({ error: "Missing sessionId parameter" }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
-        const id = env.PLANPAL_DO.idFromName(user);
-        const stub = env.PLANPAL_DO.get(id);
-        
-        return await stub.fetch("http://localhost/memory", {
-          method: "GET",
-        });
+        // Route to the Chat Agent instance for this sessionId
+        const agent = await getAgentByName(env.CHAT_AGENT, sessionId);
+        return await agent.fetch(new Request("http://localhost/memory", { method: "GET" }));
       }
 
   // Reminders: list upcoming for a user

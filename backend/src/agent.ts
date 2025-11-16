@@ -37,6 +37,18 @@ export class Chat extends Agent<Env, ChatState> {
       });
     }
 
+    // Handle GET request to retrieve conversation history
+    if (request.method === "GET") {
+      return new Response(JSON.stringify({ 
+        memory: this.state.messages || [] 
+      }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
     if (request.method === "POST") {
       try {
         const body = await request.json() as { 
@@ -71,6 +83,13 @@ How to help:
 - Don't repeat questions you've already asked
 - Adapt your format to the type of plan (Day X for trips, Timeline for events, Checklist for tasks)
 
+IMPORTANT - When providing budgets:
+- Always complete ALL calculations and show the final total
+- If you list budget items, calculate and display the sum at the end
+- Example: "Total: $450" not "Total: $"
+- Double-check your math before responding
+- Make sure your response is complete and not cut off
+
 Note: There's a separate Reminders feature in the app sidebar for setting time-based reminders. You focus on planning conversations and suggestions.`;
 
         const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
@@ -85,10 +104,10 @@ Note: There's a separate Reminders feature in the app sidebar for setting time-b
         // Access env via (this as any).env as a workaround for SDK type limitations
         const env = (this as any).env as Env;
 
-        // Call Workers AI
+        // Call Workers AI with sufficient tokens for complete responses
         const response = await env.AI.run("@cf/meta/llama-3-8b-instruct", {
           messages,
-          max_tokens: 500,
+          max_tokens: 1536, // Balanced: enough for detailed responses, avoids hitting model limits
         });
 
         const assistantMessage = response.response || "No response received";

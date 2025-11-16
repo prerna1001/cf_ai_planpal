@@ -1,65 +1,120 @@
-/* PlanPal Markdown Styling */
+/* PlanPal Markdown Styling - Enhanced for better readability */
 .planpal-paragraph {
-  margin: 0.7em 0;
-  font-size: 1.08em;
-  line-height: 1.7;
+  margin: 0.9em 0;
+  font-size: 1.05em;
+  line-height: 1.8;
+  color: #2c3e50;
 }
+
+/* First paragraph in a message has no top margin */
+.planpal-paragraph:first-child {
+  margin-top: 0;
+}
+
+/* Last paragraph in a message has reduced bottom margin */
+.planpal-paragraph:last-child {
+  margin-bottom: 0.3em;
+}
+
 .planpal-heading {
-  margin: 1.2em 0 0.7em 0;
+  margin: 1.4em 0 0.8em 0;
   font-weight: 700;
-  color: #2a3a4d;
+  color: #1a2a3d;
+  letter-spacing: -0.01em;
 }
+
+/* First heading has less top margin */
+.planpal-heading:first-child {
+  margin-top: 0.4em;
+}
+
 .planpal-h1 {
-  font-size: 1.7em;
-  border-bottom: 2px solid #e0e7ef;
-  padding-bottom: 0.2em;
+  font-size: 1.65em;
+  border-bottom: 2px solid #d0d7de;
+  padding-bottom: 0.3em;
+  margin-bottom: 0.9em;
 }
+
 .planpal-h2 {
-  font-size: 1.3em;
-  border-bottom: 1px solid #e0e7ef;
-  padding-bottom: 0.1em;
+  font-size: 1.35em;
+  border-bottom: 1px solid #d8dee4;
+  padding-bottom: 0.2em;
+  margin-bottom: 0.7em;
 }
+
 .planpal-h3 {
-  font-size: 1.1em;
+  font-size: 1.15em;
+  margin-bottom: 0.6em;
 }
+
 .planpal-list {
-  margin: 0.7em 0 0.7em 1.2em;
-  padding-left: 1.2em;
+  margin: 0.8em 0 0.9em 0;
+  padding-left: 2em;
+  color: #2c3e50;
 }
+
+/* Nested lists have less spacing */
+.planpal-list .planpal-list {
+  margin: 0.4em 0;
+}
+
 .planpal-list-ol {
   list-style-type: decimal;
 }
+
 .planpal-list-item {
-  margin: 0.3em 0;
-  font-size: 1.05em;
-  line-height: 1.6;
+  margin: 0.5em 0;
+  font-size: 1.03em;
+  line-height: 1.7;
+  padding-left: 0.3em;
 }
+
+/* Better bullet/number spacing */
+.planpal-list-item::marker {
+  color: #6b7280;
+  font-weight: 600;
+}
+
 .planpal-blockquote {
-  margin: 1em 0;
-  padding: 0.7em 1em;
-  background: #f6f8fa;
-  border-left: 4px solid #b3c2d2;
+  margin: 1.2em 0;
+  padding: 0.8em 1.2em;
+  background: #f8f9fa;
+  border-left: 4px solid #8b95a0;
   font-style: italic;
-  color: #3a4a5d;
+  color: #374151;
+  border-radius: 0 4px 4px 0;
 }
+
 .planpal-bold {
-  font-weight: bold;
-  color: #1a2a3d;
+  font-weight: 700;
+  color: #111827;
 }
+
 .planpal-italic {
   font-style: italic;
+  color: #4b5563;
 }
+
 .planpal-code {
-  background: #f3f3f3;
-  padding: 0.2em 0.4em;
+  background: #f1f3f5;
+  padding: 0.2em 0.5em;
   border-radius: 4px;
-  font-family: 'Fira Mono', 'Menlo', 'Monaco', monospace;
-  font-size: 0.98em;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 0.92em;
+  color: #c7254e;
+  border: 1px solid #e5e7eb;
 }
+
 .planpal-link {
-  color: #2a7ae2;
+  color: #2563eb;
   text-decoration: underline;
+  transition: color 0.2s;
 }
+
+.planpal-link:hover {
+  color: #1d4ed8;
+}
+
 .App {
   display: flex;
   height: 100vh;
