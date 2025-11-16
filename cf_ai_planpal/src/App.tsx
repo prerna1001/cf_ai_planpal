@@ -174,7 +174,13 @@ function App() {
   }, [clientId]);
 
   // Poll due reminders periodically and keep a local notifications list
+  // Only poll if there are upcoming reminders to avoid unnecessary requests
   useEffect(() => {
+    // Skip polling if no upcoming reminders
+    if (upcomingReminders.length === 0) {
+      return;
+    }
+
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`${API_BASE}/reminders/due?user=${encodeURIComponent(clientId)}&ack=true`);
@@ -221,7 +227,7 @@ function App() {
       }
     }, 10000); // every 10s
     return () => clearInterval(interval);
-  }, [clientId]);
+  }, [clientId, upcomingReminders.length]); // Re-run when reminders change
 
   // Resizer removed; drawer has fixed width via CSS/DRAWER_WIDTH
 
