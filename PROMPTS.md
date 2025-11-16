@@ -28,7 +28,7 @@ This project, **PlanPal**, was built with AI-assisted help using GitHub Copilot 
 - "How do I implement voice input using the Web Speech API in React?"
 
 ## Notes
-- **Native Cloudflare Features**: Project now uses Agents SDK for conversation memory, DOs for reminders, and documents Workflows for future enhancement.
+- **Native Cloudflare Features**: Project uses Agents SDK for conversation memory, DOs for reminders, and documents Workflows for future enhancement.
 - Most AI assistance was used for **debugging**, **understanding Agents SDK**, **backend memory structure**, and **Cloudflare-specific patterns**.
 - Code was **iteratively refined** and **manually tested** after generation.
-- This documentation does **not** list every prompt — only representative ones that significantly contributed to core functionality and the native Cloudflare stack.
+

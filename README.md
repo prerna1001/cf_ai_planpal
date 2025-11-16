@@ -1,6 +1,6 @@
 # PlanPal – AI Planning Assistant
 
-Live Demo: [https://a441404e.cf-ai-planpal.pages.dev/]
+Live Demo: [https://7bed3bf5.cf-ai-planpal.pages.dev/]
 
 ## Overview
 PlanPal is a modern AI-powered planning assistant built with **Cloudflare Agents**, **Durable Objects**, and **Workers AI**. It helps users plan trips, events, shopping lists, and more, with robust reminders and beautiful markdown-formatted AI output.
@@ -83,7 +83,7 @@ PROMPTS.md                   # Sample prompts used during development
 ```
 
 ## How to Test
-- Visit the live demo: [https://a441404e.cf-ai-planpal.pages.dev/]
+- Visit the live demo: [https://7bed3bf5.cf-ai-planpal.pages.dev/]
 - Try asking PlanPal to plan something ("Plan a 3-day trip to Paris").
 - Continue the conversation—Agent remembers context automatically!
 - Add reminders and test browser notifications.
