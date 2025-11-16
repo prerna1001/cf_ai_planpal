@@ -270,12 +270,15 @@ function App() {
     setMessages(prev => [...prev, thinkingMessage]);
 
     try {
-      const response = await fetch(`${API_BASE}/chat`, {
+      // Send sessionId to Agent for native conversation history management
+      // Agent will persist conversation context automatically via Cloudflare
+      const response = await fetch(`${API_BASE}/agents-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user: sessionId, // Use unique session ID instead of hardcoded email
           input: userInput,
+          sessionId: sessionId, // Cloudflare Agents manages history for this session
+          user: sessionId, // Use sessionId as user identifier for reminders
         }),
       });
 

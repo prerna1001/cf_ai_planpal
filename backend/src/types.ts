@@ -3,6 +3,7 @@ export interface Env {
   AI: any;
   Chat: DurableObjectNamespace;
   PLANPAL_DO: DurableObjectNamespace;
+  CHAT_AGENT: DurableObjectNamespace; // Agent for chat with native state management
   // Optional model override(s)
   MODEL?: string; // preferred model id, e.g. "@cf/meta/llama-3.1-8b-instruct"
   MODEL_FALLBACKS?: string; // comma-separated list of fallbacks

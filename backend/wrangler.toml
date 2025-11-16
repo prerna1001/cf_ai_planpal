@@ -14,14 +14,10 @@ remote = true
 name = "PLANPAL_DO"
 class_name = "PlanPalDO"
 
+[[durable_objects.bindings]]
+name = "CHAT_AGENT"
+class_name = "Chat"
+
 [[migrations]]
 tag = "v1"
-new_classes = ["PlanPalDO"]
-
-# Migration v2 only for production (rename Chat->PlanPalDO)
-# Commented out for local dev to avoid migration errors
-# [[migrations]]
-# tag = "v2"
-# renamed_classes = [
-# 	{ from = "Chat", to = "PlanPalDO" }
-# ]
+new_sqlite_classes = ["PlanPalDO", "Chat"]

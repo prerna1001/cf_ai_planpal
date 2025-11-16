@@ -2,12 +2,14 @@
  * Cloudflare Worker entrypoint for PlanPal
  * - Provides a small HTTP router for chat and reminders
  * - Adds friendly CORS so Cloudflare Pages/localhost can call the API
- * - Proxies requests to the Durable Object (PlanPalDO) using absolute URLs
+ * - Routes chat to Cloudflare Agents (Chat DO) for session-based conversation
+ * - Routes reminders to PlanPalDO for persistent storage and alarm management
  *
- * If you’re debugging a route, search for its section below (e.g. /chat, /reminders).
+ * If you're debugging a route, search for its section below (e.g. /agents-chat, /reminders).
  */
 import { PlanPalDO } from "./PlanPalDO";
-export { PlanPalDO };
+import { Chat } from "./agent";
+export { PlanPalDO, Chat };
 import type { Env, ExecutionContext } from "./types";
 
 export default {
@@ -27,6 +29,33 @@ export default {
     }
 
     try {
+      // Agents-based chat: POST /agents-chat — primary chat endpoint using Cloudflare Agents
+      if (request.method === "POST" && url.pathname === "/agents-chat") {
+        // Parse sessionId from request to route to the correct Agent instance
+        const body = await request.clone().json() as { sessionId?: string };
+        const sessionId = body.sessionId || "default-session";
+
+        // Cloudflare Agents SDK expects namespace/room headers.
+        // Use getServerByName to attach them automatically.
+        // (Types may not include this yet; use any-cast.)
+        const chatNamespace = "planpal"; // logical namespace for all chat sessions
+        const getServerByName = (env as any).CHAT_AGENT?.getServerByName as any;
+
+        if (getServerByName) {
+          try {
+            const server = getServerByName(chatNamespace, sessionId);
+            return await server.fetch(request);
+          } catch (e: any) {
+            // If Agents server path isn't available (e.g., SQLite not enabled), fall back to direct DO fetch
+            console.warn("Agents server fetch failed, falling back to direct DO:", e?.message || e);
+          }
+        }
+
+        // Fallback to direct DO fetch
+        const id = env.CHAT_AGENT.idFromName(sessionId);
+        const agentStub = env.CHAT_AGENT.get(id);
+        return await agentStub.fetch(request);
+      }
   // Health probe: GET /ai/check?model=...  — tiny call to verify a Workers AI model is usable
       if (request.method === "GET" && url.pathname === "/ai/check") {
         const model = url.searchParams.get("model") || "@cf/meta/llama-3.3-8b-instruct";
@@ -101,7 +130,7 @@ export default {
 
   // Reminders: create
       if (url.pathname === "/reminders" && request.method === "POST") {
-        const { user, text, at } = await request.json();
+        const { user, text, at } = await request.json() as { user?: string; text?: string; at?: string };
         if (!user || !text || !at) {
           return new Response(JSON.stringify({ error: "Missing user, text, or at" }), {
             status: 400,
@@ -119,38 +148,7 @@ export default {
         return new Response(body, { status: doRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-  // Chat: proxy to PlanPalDO — keeps the Worker thin and stateless
-      if (url.pathname === "/chat" && request.method === "POST") {
-        // Parse request
-        const { user, input } = await request.json();
-        if (!user || !input) {
-          return new Response(JSON.stringify({ error: "Missing user or input" }), { 
-            status: 400, 
-            headers: { ...corsHeaders, "Content-Type": "application/json" } 
-          });
-        }
-
-        // Get DO stub for this user
-        const id = env.PLANPAL_DO.idFromName(user);
-        const stub = env.PLANPAL_DO.get(id);
-
-        // Forward request to Durable Object at /chat with absolute URL
-        const doRes = await stub.fetch("http://localhost/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input }),
-        });
-
-        // Return response back to frontend
-        const body = await doRes.text();
-        return new Response(body, {
-          status: doRes.status,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        });
-      }
+      // Note: legacy /chat route removed in favor of /agents-chat
 
       // Route: PATCH /reminders/:id?user=... - update reminder
       if (request.method === "PATCH" && url.pathname.startsWith("/reminders/")) {

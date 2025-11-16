@@ -158,7 +158,14 @@ async fetch(request: Request): Promise<Response> {
         });
     }
 
-    const { input } = await request.json();
+    const { input } = await request.json() as { input?: string };
+    
+    if (!input) {
+      return new Response(JSON.stringify({ error: "Missing input" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Load chat memory and append the new user message
     const stored = await this.state.storage.get<unknown>("memory");
