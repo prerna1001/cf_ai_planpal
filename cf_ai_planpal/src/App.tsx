@@ -722,7 +722,7 @@ function App() {
                       strong: ({node, ...props}) => <strong className="planpal-bold" {...props} />,
                       em: ({node, ...props}) => <em className="planpal-italic" {...props} />,
                       code: ({node, ...props}) => <code className="planpal-code" {...props} />,
-                      a: ({node, ...props}) => <a className="planpal-link" {...props} />,
+                      a: ({node, ...props}) => <a className="planpal-link" target="_blank" rel="noopener noreferrer" {...props} />,
                     }}
                   >
                     {msg.content}
