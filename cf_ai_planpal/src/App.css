@@ -69,6 +69,12 @@
   padding-left: 0.3em;
 }
 
+/* Keep content on same line as list number/bullet */
+.planpal-list-item > p {
+  display: inline;
+  margin: 0;
+}
+
 /* Better bullet/number spacing */
 .planpal-list-item::marker {
   color: #6b7280;
