@@ -7,10 +7,13 @@ PlanPal is a modern AI-powered planning assistant built with **Cloudflare Agents
 
 ## Features
 - **AI Chat with Agents**: Cloudflare Agents provide persistent conversation history and session management—no manual history shuffling needed!
+- **Smart Planning**: Handles trips, weddings, events, concerts, shopping, projects—anything you need to plan
+- **Intelligent Formatting**: AI responses with proper markdown—headings, lists, bold, links to restaurants/hotels/attractions
 - **Reminders**: Add, edit, and delete reminders with date/time. Get browser notifications and popups for due reminders.
-- **Markdown Output**: AI responses are rendered with full markdown support—headings, lists, bold, code, and more.
+- **Smart Reminder Checking**: Efficient scheduling checks when reminders are due (not constant polling)
 - **Voice Input**: Dictate your plans and reminders using built-in voice recognition (Chrome/Edge recommended).
-- **Chat History**: View, load, and delete previous chat sessions (stored in Agent state).
+- **Chat History**: View, load, and delete previous chat sessions—conversation state persists across sessions.
+- **External Links**: AI includes clickable links for places, restaurants, hotels, and attractions (opens in new tab)
  
 
 ## Technologies Used
@@ -23,8 +26,8 @@ PlanPal is a modern AI-powered planning assistant built with **Cloudflare Agents
 - **Backend**:
   - **Cloudflare Agents** (for AI chat with built-in state management)
   - **Cloudflare Workers** (request routing, API endpoints)
-  - **Durable Objects** (persistent reminder storage, alarm scheduling)
-  - **Workers AI** (LLM inference: '@cf/meta/llama-3.1-8b-instruct', '@cf/meta/llama-3-8b-instruct')
+  - **Durable Objects** (persistent reminder storage, DO Alarm scheduling)
+  - **Workers AI** (LLM inference: '@cf/meta/llama-3-8b-instruct' with 1536 max tokens)
   
 - **Dev Tools**:
   - Wrangler (Cloudflare CLI)
@@ -44,7 +47,9 @@ PlanPal is a modern AI-powered planning assistant built with **Cloudflare Agents
    - CRUD operations via REST API
 
 3. **Scheduled Tasks**: DO alarms
-  - DO alarms trigger reminder checks reliably
+  - DO alarms trigger when reminders are due (not polling)
+  - Frontend uses smart setTimeout scheduling + 30s fallback polling
+  - Efficient notification delivery
 
 ### How It Works
 ```
@@ -52,7 +57,9 @@ User → Agent (sessionId for chat memory)
          ↓
     AI generates response (Workers AI)
          ↓
-    Agent stores in state → Custom methods call DO for reminders
+    Agent stores in state (POST) → Retrieve via GET /memory/:sessionId
+      ↓
+    Custom methods call DO for reminders
          ↓
     DO schedules alarms → Notifications
 ```
@@ -93,8 +100,8 @@ PROMPTS.md                   # Sample prompts used during development
 Enjoy planning with PlanPal!
 
 ## Assignment Checklist (Cloudflare AI App)
-- [x] **LLM**: Uses Workers AI with '@cf/meta/llama-3.1-8b-instruct' and '@cf/meta/llama-3-8b-instruct' models for generating plans and chat responses.
-  - **Where:** See `backend/src/agent.ts` (Agent AI calls with Workers AI), `backend/src/PlanPalDO.ts` (fallback model logic).
+- [x] **LLM**: Uses Workers AI with '@cf/meta/llama-3-8b-instruct' model (max_tokens: 1536) for generating plans and chat responses with proper markdown formatting.
+  - **Where:** See `backend/src/agent.ts` (Agent AI calls with Workers AI and system prompt).
   
 - [x] **Workflow / Coordination**: Built with **Cloudflare Agents** (for chat orchestration), **Durable Objects** (for reminders and alarms), and **Workers** (for routing).
   - **Where:** See `backend/src/worker.ts` (routing to Agent and DO), `backend/src/agent.ts` (Agent class), `backend/src/PlanPalDO.ts` (DO logic).
