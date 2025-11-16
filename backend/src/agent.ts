@@ -9,7 +9,7 @@
  * How it works:
  * - Each Agent instance = one user session (addressed by sessionId)
  * - this.state persists messages automatically (survives restarts)
- * - Custom methods (createReminder, etc.) provide AI-callable actions
+ * - Custom methods (createReminder, etc.) provide callable actions
  */
 import { Agent } from "agents";
 import type { Env } from "./types";
@@ -154,34 +154,3 @@ When users ask about reminders, you can help them create, list, or manage remind
     return await response.json();
   }
 }
-
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-
-    // Handle CORS preflight for all routes
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-      });
-    }
-
-    if (url.pathname === "/chat") {
-      // Route to Chat Durable Object
-      const id = env.Chat.idFromName("chat-session");
-      const durableObject = env.Chat.get(id);
-      return durableObject.fetch(request);
-    }
-
-    return new Response("Not found", { 
-      status: 404,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  },
-};

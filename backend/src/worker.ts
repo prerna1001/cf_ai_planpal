@@ -9,6 +9,7 @@
  */
 import { PlanPalDO } from "./PlanPalDO";
 import { Chat } from "./agent";
+import { getAgentByName } from "agents";
 export { PlanPalDO, Chat };
 import type { Env, ExecutionContext } from "./types";
 
@@ -35,26 +36,9 @@ export default {
         const body = await request.clone().json() as { sessionId?: string };
         const sessionId = body.sessionId || "default-session";
 
-        // Cloudflare Agents SDK expects namespace/room headers.
-        // Use getServerByName to attach them automatically.
-        // (Types may not include this yet; use any-cast.)
-        const chatNamespace = "planpal"; // logical namespace for all chat sessions
-        const getServerByName = (env as any).CHAT_AGENT?.getServerByName as any;
-
-        if (getServerByName) {
-          try {
-            const server = getServerByName(chatNamespace, sessionId);
-            return await server.fetch(request);
-          } catch (e: any) {
-            // If Agents server path isn't available (e.g., SQLite not enabled), fall back to direct DO fetch
-            console.warn("Agents server fetch failed, falling back to direct DO:", e?.message || e);
-          }
-        }
-
-        // Fallback to direct DO fetch
-        const id = env.CHAT_AGENT.idFromName(sessionId);
-        const agentStub = env.CHAT_AGENT.get(id);
-        return await agentStub.fetch(request);
+        // Use getAgentByName from Agents SDK to route to the correct Agent instance
+        const agent = await getAgentByName(env.CHAT_AGENT, sessionId);
+        return await agent.fetch(request);
       }
   // Health probe: GET /ai/check?model=...  — tiny call to verify a Workers AI model is usable
       if (request.method === "GET" && url.pathname === "/ai/check") {
